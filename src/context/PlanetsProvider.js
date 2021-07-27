@@ -8,7 +8,10 @@ function PlanetsProvider({ children }) {
   const [planetsData, setPlanetsData] = useState([]);
   const [loading, setSetLoading] = useState(false);
   const [error, setError] = useState(undefined);
-  const [filters, setFilters] = useState([]);
+  const [filters, setFilters] = useState([
+    { filterByName: {} },
+    { filterByNumericValues: [] },
+  ]);
 
   const handleAPISuccess = ({ results }) => {
     setAPIData(results);
@@ -38,8 +41,32 @@ function PlanetsProvider({ children }) {
     setFilters(updatedFilter);
 
     const filterPlanets = apiData.filter(({ name }) => (
-      name.includes(text)
+      name.toLowerCase().includes(text.toLowerCase())
     ));
+    setPlanetsData(filterPlanets);
+  };
+
+  const filterByNumericValues = (column, comparison, value) => {
+    const updatedFilter = filters;
+    updatedFilter[1].filterByNumericValues.push({
+      column,
+      comparison,
+      value,
+    });
+    setFilters(updatedFilter);
+
+    const filterPlanets = apiData.filter((planet) => {
+      if (comparison === 'maior que') {
+        return parseInt(planet[`${column}`], 10) > parseInt(value, 10);
+      }
+      if (comparison === 'menor que') {
+        return parseInt(planet[`${column}`], 10) < parseInt(value, 10);
+      }
+      if (comparison === 'igual a') {
+        return parseInt(planet[`${column}`], 10) === parseInt(value, 10);
+      }
+      return null;
+    });
     setPlanetsData(filterPlanets);
   };
 
@@ -52,6 +79,7 @@ function PlanetsProvider({ children }) {
           loading,
           error,
           filterByName,
+          filterByNumericValues,
         } }
       >
         {children}
