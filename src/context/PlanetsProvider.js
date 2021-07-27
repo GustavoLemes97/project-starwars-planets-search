@@ -4,11 +4,14 @@ import PlanetsContext from './PlanetsContext';
 import { getPlanetsData } from '../services/starWaresAPI';
 
 function PlanetsProvider({ children }) {
+  const [apiData, setAPIData] = useState([]);
   const [planetsData, setPlanetsData] = useState([]);
   const [loading, setSetLoading] = useState(false);
   const [error, setError] = useState(undefined);
+  const [filters, setFilters] = useState([]);
 
   const handleAPISuccess = ({ results }) => {
+    setAPIData(results);
     setPlanetsData(results);
     setSetLoading(false);
   };
@@ -29,6 +32,17 @@ function PlanetsProvider({ children }) {
     }
   };
 
+  const filterByName = (text) => {
+    const updatedFilter = filters;
+    updatedFilter[0] = { filterByName: { text } };
+    setFilters(updatedFilter);
+
+    const filterPlanets = apiData.filter(({ name }) => (
+      name.includes(text)
+    ));
+    setPlanetsData(filterPlanets);
+  };
+
   return (
     <main>
       <PlanetsContext.Provider
@@ -37,6 +51,7 @@ function PlanetsProvider({ children }) {
           fetchPlanetsApi,
           loading,
           error,
+          filterByName,
         } }
       >
         {children}
