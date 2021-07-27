@@ -4,38 +4,41 @@ import PlanetsContext from './PlanetsContext';
 import { getPlanetsData } from '../services/starWaresAPI';
 
 function PlanetsProvider({ children }) {
-  const [planetsData, setPlanetsData] = useState({ isLoading: false, data: [] });
+  const [planetsData, setPlanetsData] = useState([]);
+  const [loading, setSetLoading] = useState(false);
+  const [error, setError] = useState(undefined);
 
-  const handleAPISuccess = (response) => {
-    setPlanetsData({
-      ...planetsData,
-      isLoading: false,
-      data: response,
-    });
+  const handleAPISuccess = ({ results }) => {
+    setPlanetsData(results);
+    setSetLoading(false);
   };
 
-  const handleAPIError = (response) => {
-    setPlanetsData({
-      ...planetsData,
-      isLoading: false,
-      erro: response.message,
-    });
+  const handleAPIError = ({ message }) => {
+    setError(message);
+    setSetLoading(false);
   };
 
   const fetchPlanetsApi = async () => {
-    setPlanetsData({ isLoading: true });
+    setSetLoading(true);
 
     try {
       const response = await getPlanetsData();
       handleAPISuccess(response);
-    } catch (error) {
-      handleAPIError(error);
+    } catch (errorMessage) {
+      handleAPIError(errorMessage);
     }
   };
 
   return (
     <main>
-      <PlanetsContext.Provider value={ { planetsData, fetchPlanetsApi } }>
+      <PlanetsContext.Provider
+        value={ {
+          planetsData,
+          fetchPlanetsApi,
+          loading,
+          error,
+        } }
+      >
         {children}
       </PlanetsContext.Provider>
     </main>

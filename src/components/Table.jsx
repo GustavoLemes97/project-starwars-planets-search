@@ -4,8 +4,10 @@ import PlanetsContext from '../context/PlanetsContext';
 
 function Table() {
   const {
-    planetsData: { data, isLoading },
+    planetsData,
+    loading,
     fetchPlanetsApi,
+    error,
   } = useContext(PlanetsContext);
 
   useEffect(() => {
@@ -13,9 +15,7 @@ function Table() {
   }, []);
 
   const renderTable = () => {
-    const { results = [] } = data;
-
-    return (
+    const table = (
       <table>
         <thead>
           <tr>
@@ -35,7 +35,7 @@ function Table() {
           </tr>
         </thead>
         <tbody>
-          { results.map((planet) => (
+          { planetsData.map((planet) => (
             <tr key={ planet.name }>
               <td>{ planet.name }</td>
               <td>{ planet.rotation_period }</td>
@@ -55,13 +55,20 @@ function Table() {
         </tbody>
       </table>
     );
+    if (error === undefined) return table;
+    return (
+      <div>
+        Erro:
+        { error }
+      </div>
+    );
   };
 
   const renderLoading = () => <div>Loading...</div>;
 
   return (
     <div>
-      {isLoading ? renderLoading() : renderTable()}
+      {loading ? renderLoading() : renderTable()}
     </div>
   );
 }
