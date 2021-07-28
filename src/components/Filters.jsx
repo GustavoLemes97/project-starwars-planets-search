@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 // import './App.css';
 import PlanetsContext from '../context/PlanetsContext';
 
@@ -6,11 +6,13 @@ function Filters() {
   const {
     filterByName,
     filterByNumericValues,
+    updatePlanets,
+    removeFilter,
   } = useContext(PlanetsContext);
 
   const [state, setState] = useState({
-    column: '',
-    comparison: '',
+    column: 'population',
+    comparison: 'maior que',
     valor: '',
     columnsData: [
       'population',
@@ -19,6 +21,7 @@ function Filters() {
       'rotation_period',
       'surface_water',
     ],
+    filteredColumns: [],
   });
 
   const handleChange = ({ name, value }) => {
@@ -29,21 +32,47 @@ function Filters() {
   };
 
   const removeColumn = (column) => {
-    const { columnsData } = state;
+    const { columnsData, filteredColumns } = state;
     const updateColumns = columnsData;
+    const updateFiltered = filteredColumns;
     updateColumns.forEach((columnName, index) => {
       if (columnName === column) {
         updateColumns.splice(index, 1);
       }
     });
+    updateFiltered.push(column);
 
     setState({
       ...state,
       columnsData: updateColumns,
+      filteredColumns: updateFiltered,
     });
   };
 
-  const { column, comparison, valor, columnsData } = state;
+  const removeFilteredColumn = (column) => {
+    const { columnsData, filteredColumns } = state;
+    const updateColumns = columnsData;
+    const updateFiltered = filteredColumns;
+
+    updateFiltered.forEach((columnName, index) => {
+      if (columnName === column) {
+        updateFiltered.splice(index, 1);
+      }
+    });
+    updateColumns.push(column);
+
+    setState({
+      ...state,
+      columnsData: updateColumns,
+      filteredColumns: updateFiltered,
+    });
+  };
+
+  useEffect(() => {
+    updatePlanets();
+  }, [state.filteredColumns]);
+
+  const { column, comparison, valor, columnsData, filteredColumns } = state;
 
   return (
     <div>
@@ -60,7 +89,6 @@ function Filters() {
         name="column"
         data-testid="column-filter"
       >
-        {/* <option defaultValue="selected">Selecione uma Opção</option> */}
         { columnsData.map((columnName, index) => (
           <option
             key={ index }
@@ -75,7 +103,6 @@ function Filters() {
         name="comparison"
         data-testid="comparison-filter"
       >
-        <option defaultValue="selected">Selecione uma Opção</option>
         <option value="maior que">maior que</option>
         <option value="menor que">menor que</option>
         <option value="igual a">igual a</option>
@@ -97,6 +124,25 @@ function Filters() {
       >
         Filtrar
       </button>
+      {
+        filteredColumns.map((columnName, index) => (
+          <div
+            key={ index }
+            data-testid="filter"
+          >
+            <span>{ columnName }</span>
+            <button
+              onClick={ () => {
+                removeFilteredColumn(columnName);
+                removeFilter(columnName);
+              } }
+              type="button"
+            >
+              X
+            </button>
+          </div>
+        ))
+      }
     </div>
   );
 }

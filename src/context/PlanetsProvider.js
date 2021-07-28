@@ -46,6 +46,27 @@ function PlanetsProvider({ children }) {
     setPlanetsData(filterPlanets);
   };
 
+  const updatePlanets = () => {
+    const { filterByNumericValues } = filters[1];
+    let filterPlanets = apiData;
+
+    filterByNumericValues.forEach(({ column, comparison, value }) => {
+      filterPlanets = filterPlanets.filter((planet) => {
+        if (comparison === 'maior que') {
+          return parseInt(planet[`${column}`], 10) > parseInt(value, 10);
+        }
+        if (comparison === 'menor que') {
+          return parseInt(planet[`${column}`], 10) < parseInt(value, 10);
+        }
+        if (comparison === 'igual a') {
+          return parseInt(planet[`${column}`], 10) === parseInt(value, 10);
+        }
+        return null;
+      });
+    });
+    setPlanetsData(filterPlanets);
+  };
+
   const filterByNumericValues = (column, comparison, value) => {
     const updatedFilter = filters;
     updatedFilter[1].filterByNumericValues.push({
@@ -55,19 +76,18 @@ function PlanetsProvider({ children }) {
     });
     setFilters(updatedFilter);
 
-    const filterPlanets = apiData.filter((planet) => {
-      if (comparison === 'maior que') {
-        return parseInt(planet[`${column}`], 10) > parseInt(value, 10);
-      }
-      if (comparison === 'menor que') {
-        return parseInt(planet[`${column}`], 10) < parseInt(value, 10);
-      }
-      if (comparison === 'igual a') {
-        return parseInt(planet[`${column}`], 10) === parseInt(value, 10);
-      }
-      return null;
-    });
-    setPlanetsData(filterPlanets);
+    updatePlanets();
+  };
+
+  const removeFilter = (columnName) => {
+    let updateFilter = [];
+    const auxFilter = filters.slice();
+    updateFilter = filters[1].filterByNumericValues.filter(({ column }) => (
+      columnName !== column
+    ));
+    auxFilter[1].filterByNumericValues = updateFilter;
+    setFilters(auxFilter);
+    updatePlanets();
   };
 
   return (
@@ -80,6 +100,8 @@ function PlanetsProvider({ children }) {
           error,
           filterByName,
           filterByNumericValues,
+          updatePlanets,
+          removeFilter,
         } }
       >
         {children}
